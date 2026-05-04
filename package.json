@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "quote:unstake" : "tsx ts/src/quote-jito-sol-to-sol.ts"
+    "quote:unstake": "tsx ts/src/quote-jito-sol-to-sol.ts"
   },
   "repository": {
     "type": "git",
@@ -18,5 +18,9 @@
     "url": "https://github.com/kurosaki-sol/Jito-stake/issues"
   },
   "homepage": "https://github.com/kurosaki-sol/Jito-stake#readme",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
 }

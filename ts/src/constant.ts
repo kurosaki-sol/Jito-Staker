@@ -5,7 +5,9 @@ export const JUPITER_QUOTEAPI= "https://lite-api.jup.ag/swap/v1/quote";
 
 
 // Const variables for the jupiter quotes - Will be able to parse later
-const AMOUNT_JITOSOL = 1_000_000_000;
+export const LAMPORT_PER_SOL = 1_000_000_000;
+
+export const JITOSOL_DECIMALS = 9;
 // Default for the moment - NOTE : Transaction will fail with jup if amount exceeds the threshold
-const slippage_bps = 50
+export const slippage_bps = 50;
 
