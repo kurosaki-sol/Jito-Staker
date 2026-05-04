@@ -30,11 +30,11 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
 }
 
 async function printQuote(quote : any){
-    console.log(formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
-    console.log(formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' SOL')
-    console.log(quote.slippageBps/100 +'%')
-    console.log(quote.priceImpactPct)
-    console.log(quote.routePlan[0]['swapInfo']['label'])
+    console.log('Input : ' + formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
+    console.log('Output : ' + formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' SOL')
+    console.log('Slippage : ' + quote.slippageBps/100 +'%')
+    console.log('Price Impact : ' + quote.priceImpactPct)
+    console.log('Route : ' + quote.routePlan[0]['swapInfo']['label'])
 }
 
 async function main() {
