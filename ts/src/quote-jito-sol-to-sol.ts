@@ -50,11 +50,17 @@ async function printQuote(quote : JupResponse){
         console.log("\nPrice impact too high. Jito delayed unstake may be cheaper.")
 }
 
+function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
+    const [whole = "0", fraction = ""] = rawAmount.split('.');
+    const fracpadded =  fraction.padEnd(decimals, "0").slice(0, decimals);
+    return BigInt(whole + fracpadded);
+}
+
 async function main() {
     const url = new URL(Constants.JUPITER_QUOTEAPI)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
     url.searchParams.set("outputMint", Constants.WSOL_MINT)
-    url.searchParams.set("amount", (Number(process.argv[2])*Number(Constants.LAMPORT_PER_SOL)).toString() ?? Constants.LAMPORT_PER_SOL)
+    url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? Constants.LAMPORT_PER_SOL)
     url.searchParams.set("slippageBps", Constants.slippage_bps.toString())
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
