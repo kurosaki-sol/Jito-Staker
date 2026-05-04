@@ -15,6 +15,28 @@ export interface JupResponse {
     swapUsdValue: string,
 }
 
+function formatTokenAmount(rawAmount : string, decimals : number): string{
+    const amount = BigInt(rawAmount)
+    const base = 10n ** BigInt(decimals);
+
+    const whole = amount / base
+    const fraction = amount % base
+    const fractionText = fraction.toString().padStart(decimals, "0")
+
+    if (fractionText.length == 0)
+            return whole.toString()
+
+    return `${whole.toString()}.${fractionText}`
+}
+
+async function printQuote(quote : any){
+    console.log(formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
+    console.log(formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' SOL')
+    console.log(quote.slippageBps/100 +'%')
+    console.log(quote.priceImpactPct)
+    console.log(quote.routePlan[0]['swapInfo']['label'])
+}
+
 async function main() {
     const url = new URL(Constants.JUPITER_QUOTEAPI)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
@@ -27,7 +49,7 @@ async function main() {
     if(!response.ok)
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}`)
     const quote = await response.json() as JupResponse;
-    console.log(quote)
+    printQuote(quote);
 }
 
 main().catch((error) => {
