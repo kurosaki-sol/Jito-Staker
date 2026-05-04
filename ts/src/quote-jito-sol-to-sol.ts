@@ -1,5 +1,13 @@
 import * as Constants from  "./constant.ts";
 
+export interface JupiterSwapInfo{
+    label: string;
+}
+
+export interface JupiteRouterPlan{
+    swapInfo: JupiterSwapInfo;
+}
+
 export interface JupResponse {
     inputMint: string,
     inAmount: string,
@@ -9,7 +17,7 @@ export interface JupResponse {
     swapMode: string,
     slippageBps: number,
     priceImpactPct : string,
-    routePlan : unknown[],
+    routePlan : JupiteRouterPlan[],
     contextSlot: number,
     timeTaken : number,
     swapUsdValue: string,
@@ -29,13 +37,13 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
-async function printQuote(quote : any){
+async function printQuote(quote : JupResponse){
     console.log('Input : ' + formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
     console.log('Output : ' + formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' Sol')
     console.log('Minimum received : '+ formatTokenAmount(quote.otherAmountThreshold, Constants.JITOSOL_DECIMALS) +' Sol')
     console.log('Slippage : ' + quote.slippageBps/100 +'%')
     console.log('Price Impact : ' + quote.priceImpactPct) // Will be cleaned later
-    console.log('Route : ' + quote.routePlan[0]['swapInfo']['label'])
+    console.log('Route : ' + quote.routePlan[0].swapInfo.label)
 
     if (Number(quote.priceImpactPct) < 0.01)
         console.log("\nThis instant unstake route looks safe for this amount.")
