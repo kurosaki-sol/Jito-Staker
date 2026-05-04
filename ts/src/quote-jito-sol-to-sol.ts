@@ -37,10 +37,10 @@ async function printQuote(quote : any){
     console.log('Price Impact : ' + quote.priceImpactPct) // Will be cleaned later
     console.log('Route : ' + quote.routePlan[0]['swapInfo']['label'])
 
-    if quote.priceImpactPct < 0.001:
-        console.log("\n This instant unstake route looks safe for this amount.")
-    else:
-        console.log("Price impact too high. Jito delayed unstake may be cheaper.")
+    if (Number(quote.priceImpactPct) < 0.01)
+        console.log("\nThis instant unstake route looks safe for this amount.")
+    else
+        console.log("\nPrice impact too high. Jito delayed unstake may be cheaper.")
 }
 
 async function main() {
