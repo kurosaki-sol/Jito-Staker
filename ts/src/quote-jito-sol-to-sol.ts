@@ -1,11 +1,10 @@
 import * as Constants from  "./constant.ts";
 
-export interface JupiterSwapInfo{
-    label: string;
-}
-
-export interface JupiteRouterPlan{
-    swapInfo: JupiterSwapInfo;
+interface JupiteRouterPlan {
+    swapInfo: {
+      label: string;
+    };
+    //percent: number; Added but dont needed yet. Im lazy
 }
 
 export interface JupResponse {
