@@ -54,7 +54,7 @@ async function main() {
     const url = new URL(Constants.JUPITER_QUOTEAPI)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
     url.searchParams.set("outputMint", Constants.WSOL_MINT)
-    url.searchParams.set("amount", Constants.LAMPORT_PER_SOL.toString())
+    url.searchParams.set("amount", (Number(process.argv[2])*Number(Constants.LAMPORT_PER_SOL)).toString() ?? "1")
     url.searchParams.set("slippageBps", Constants.slippage_bps.toString())
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
