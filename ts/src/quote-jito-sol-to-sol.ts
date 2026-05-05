@@ -51,8 +51,18 @@ async function printQuote(quote : JupResponse){
 }
 
 function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
-    const [whole = "0", fraction = ""] = rawAmount.split('.');
-    const fracpadded =  fraction.padEnd(decimals, "0").slice(0, decimals);
+    //Security in case of bad args
+    // 1 : Trim 
+    // 2 : Check invalid args
+    // 3 : 
+    const amount = rawAmount.trim();
+    if (!/^\d+(\.\d+)?$/.test(amount))
+        throw new Error(`Invalid token amount : ${rawAmount}`)
+    const [whole = "0", fraction = ""] = amount.split('.');
+    // Better than doing a slice tbh
+    if (fraction.length > decimals)
+        throw new Error(`Too many decimals : ${rawAmount}`)
+    const fracpadded =  fraction.padEnd(decimals, "0")
     return BigInt(whole + fracpadded);
 }
 
