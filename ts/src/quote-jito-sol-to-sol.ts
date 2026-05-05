@@ -59,7 +59,7 @@ function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
     if (!/^\d+(\.\d+)?$/.test(amount))
         throw new Error(`Invalid token amount : ${rawAmount}`)
     const [whole = "0", fraction = ""] = amount.split('.');
-    // Better than doing a slice tbh
+    // Better than doing a slice tbh because that was only 
     if (fraction.length > decimals)
         throw new Error(`Too many decimals : ${rawAmount}`)
     const fracpadded =  fraction.padEnd(decimals, "0")
@@ -67,7 +67,7 @@ function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
 }
 
 async function main() {
-    const url = new URL(Constants.JUPITER_QUOTEAPI)
+    const url = new URL(Constants.JUPITER_QUOTE_API)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
     url.searchParams.set("outputMint", Constants.WSOL_MINT)
     url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? Constants.LAMPORT_PER_SOL)
