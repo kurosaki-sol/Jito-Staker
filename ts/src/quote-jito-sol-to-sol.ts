@@ -15,8 +15,13 @@ export interface JupResponse {
     otherAmountThreshold: string,
     swapMode: string,
     slippageBps: number,
+    priceImpact: number,
     priceImpactPct : string,
     routePlan : JupiteRouterPlan[],
+    router: string,
+    transaction: string | null,
+    requestId: string,
+    lastValidBlockHeight: string,
     contextSlot: number,
     timeTaken : number,
     swapUsdValue: string,
@@ -50,7 +55,7 @@ async function printQuote(quote : JupResponse){
         console.log("\nPrice impact too high. Jito delayed unstake may be cheaper.")
 }
 
-function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
+function parseTokenAmount(rawAmount : string, decimals: number): bigint{
     //Security in case of bad args
     // 1 : Trim 
     // 2 : Check invalid args
@@ -66,6 +71,7 @@ function parseTokenAmount(rawAmount : string, decimals: number): BigInt{
     return BigInt(whole + fracpadded);
 }
 
+
 async function main() {
     const url = new URL(Constants.JUPITER_QUOTE_API)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
@@ -74,10 +80,13 @@ async function main() {
     url.searchParams.set("slippageBps", Constants.slippage_bps.toString())
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
-    const response = await fetch(url)
+    const response = await fetch(url, {headers: {"x-api-key": process.env.JUPITER_API_KEY.toString()}})
     if(!response.ok)
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}`)
+
+//    console.log(await response.json())
     const quote = await response.json() as JupResponse;
+    //console.log(quote)
     printQuote(quote);
 }
 
