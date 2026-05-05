@@ -1,4 +1,7 @@
 import * as Constants from  "./constant.ts";
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 interface JupiteRouterPlan {
     swapInfo: {
@@ -31,6 +34,7 @@ export interface JupResponse {
     swapUsdValue: string,
 }
 
+// TO BE REFACTORED
 function formatTokenAmount(rawAmount : string, decimals : number): string{
     const amount = BigInt(rawAmount)
     const base = 10n ** BigInt(decimals);
@@ -45,13 +49,16 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
-async function printQuote(quote : JupResponse){
+async function printQuote(quote : JupResponse, IsTransaction: Boolean){
     console.log('Input : ' + formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
     console.log('Output : ' + formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' Sol')
     console.log('Minimum received : '+ formatTokenAmount(quote.otherAmountThreshold, Constants.JITOSOL_DECIMALS) +' Sol')
     console.log('Slippage : ' + quote.slippageBps/100 +'%')
-    console.log('Price Impact : ' + quote.priceImpactPct) // Will be cleaned later
-    console.log('Route : ' + quote.routePlan[0].swapInfo.label)
+    console.log('Prince Impact' + quote.priceImpact)
+    console.log('Price Impact percentage : ' + quote.priceImpactPct) // Will be cleaned later
+    console.log('Router : ' + quote.routePlan[0].swapInfo.label)
+    console.log('Route : ' + quote.router)
+    console.log('Transaction : ' + IsTransaction)
 
     if (Number(quote.priceImpactPct) < 0.01)
         console.log("\nThis instant unstake route looks safe for this amount.")
@@ -98,8 +105,8 @@ async function main() {
 
 //    console.log(await response.json())
     const quote = await response.json() as JupResponse;
-    //console.log(quote)
-    printQuote(quote);
+    const IsTransaction = Boolean(quote.transaction);
+    printQuote(quote, IsTransaction);
 }
 
 main().catch((error) => {
