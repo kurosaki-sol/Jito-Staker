@@ -71,8 +71,9 @@ function parseTokenAmount(rawAmount : string, decimals: number): bigint{
     return BigInt(whole + fracpadded);
 }
 
-
 async function main() {
+    if(!process.env.JUPITER_API_KEY)
+        throw new Error("Jupiter API is missing")
     const url = new URL(Constants.JUPITER_QUOTE_API)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
     url.searchParams.set("outputMint", Constants.WSOL_MINT)
@@ -80,7 +81,7 @@ async function main() {
     url.searchParams.set("slippageBps", Constants.slippage_bps.toString())
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
-    const response = await fetch(url, {headers: {"x-api-key": process.env.JUPITER_API_KEY.toString()}})
+    const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}`)
 
