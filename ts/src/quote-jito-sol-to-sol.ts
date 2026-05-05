@@ -74,10 +74,17 @@ function parseTokenAmount(rawAmount : string, decimals: number): bigint{
 async function main() {
     if(!process.env.JUPITER_API_KEY)
         throw new Error("Jupiter API is missing")
+    const taker = process.argv[3];
+    const receiver = process.argv[4];
     const url = new URL(Constants.JUPITER_QUOTE_API)
     url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
     url.searchParams.set("outputMint", Constants.WSOL_MINT)
     url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? Constants.LAMPORT_PER_SOL)
+    //new params for the order v2
+    if(taker)
+        url.searchParams.set("taker", taker)
+    if(receiver)
+        url.searchParams.set("receiver", receiver)
     url.searchParams.set("slippageBps", Constants.slippage_bps.toString())
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
