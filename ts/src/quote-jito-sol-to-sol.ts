@@ -7,6 +7,7 @@ interface JupiteRouterPlan {
     //percent: number; Added but dont needed yet. Im lazy
 }
 
+// To be re-organized properly
 export interface JupResponse {
     inputMint: string,
     inAmount: string,
@@ -22,6 +23,9 @@ export interface JupResponse {
     transaction: string | null,
     requestId: string,
     lastValidBlockHeight: string,
+    signatureFeeLamports: number, 
+    prioritizationFeeLamports: number,
+    rentFeeLamports: number,
     contextSlot: number,
     timeTaken : number,
     swapUsdValue: string,
