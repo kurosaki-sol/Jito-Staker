@@ -1,7 +1,7 @@
 import * as Constants from  "./constant.ts";
 import dotenv from 'dotenv';
 
-import {getBase64Decoder, getBase64Encoder} from "@solana/kit";
+import {getBase64Decoder, getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDecoder} from "@solana/kit";
 
 dotenv.config()
 
@@ -54,7 +54,10 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
 
 
 function decodeJupTransaction(transactionBase: string){
-    console.log("Decoded base:" + getBase64Encoder().encode(transactionBase))
+    const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
+    //console.log("decoded base: " + Object.keys(getCompiledTransactionMessageDecoder().decode(txid.messageBytes)))
+    console.log("decoded message:");
+    console.dir(getCompiledTransactionMessageDecoder().decode(txid.messageBytes), { depth: null });
 }
 
 async function printQuote(quote : JupResponse){
