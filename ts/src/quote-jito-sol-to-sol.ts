@@ -1,6 +1,8 @@
 import * as Constants from  "./constant.ts";
 import dotenv from 'dotenv';
 
+import {getBase64Decoder, getBase64Encoder} from "@solana/kit";
+
 dotenv.config()
 
 interface JupiteRouterPlan {
@@ -31,6 +33,7 @@ export interface JupResponse {
     rentFeeLamports: number,
     contextSlot: number,
     timeTaken : number,
+    error : string | null,
     swapUsdValue: string,
 }
 
@@ -49,18 +52,34 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
-async function printQuote(quote : JupResponse, IsTransaction: Boolean){
+
+function decodeJupTransaction(transactionBase: string){
+    console.log("Decoded base:" + getBase64Encoder().encode(transactionBase))
+}
+
+async function printQuote(quote : JupResponse){
+
+    if(quote.error)
+        throw new Error(`${quote.error}`)
     console.log('Input : ' + formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
     console.log('Output : ' + formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' Sol')
     console.log('Minimum received : '+ formatTokenAmount(quote.otherAmountThreshold, Constants.JITOSOL_DECIMALS) +' Sol')
     console.log('Slippage : ' + quote.slippageBps/100 +'%')
-    console.log('Prince Impact' + quote.priceImpact)
-    console.log('Price Impact percentage : ' + quote.priceImpactPct) // Will be cleaned later
-    console.log('Router : ' + quote.routePlan[0].swapInfo.label)
-    console.log('Route : ' + quote.router)
-    console.log('Transaction : ' + IsTransaction)
+    console.log('Price Impact' + quote.priceImpact)
+    //console.log('Price Impact percentage : ' + quote.priceImpactPct) // Will be cleaned later
+    console.log('Route : ' + quote.routePlan[0].swapInfo.label)
+    console.log('Router : ' + quote.router)
+    //Print if this is a transaction
+    if(quote.transaction){
+        console.log('Signature Fee : ', formatTokenAmount(quote.signatureFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
+        console.log('Priority Fee : ', formatTokenAmount(quote.prioritizationFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
+    }
+    console.log('Transaction : ' + quote.transaction);
+    if (quote.transaction)
+        decodeJupTransaction(quote.transaction);
 
-    if (Number(quote.priceImpactPct) < 0.01)
+
+    if (Math.abs(quote.priceImpact) < 0.01) // treshold to be determinated - NOTE
         console.log("\nThis instant unstake route looks safe for this amount.")
     else
         console.log("\nPrice impact too high. Jito delayed unstake may be cheaper.")
@@ -84,13 +103,13 @@ function parseTokenAmount(rawAmount : string, decimals: number): bigint{
 
 async function main() {
     if(!process.env.JUPITER_API_KEY)
-        throw new Error("Jupiter API is missing")
+        throw new Error("Jupiter API is missing.")
     const taker = process.argv[3];
     const receiver = process.argv[4];
     const url = new URL(Constants.JUPITER_QUOTE_API)
-    url.searchParams.set("inputMint", Constants.JITOSOL_MINT)
-    url.searchParams.set("outputMint", Constants.WSOL_MINT)
-    url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? Constants.LAMPORT_PER_SOL)
+    url.searchParams.set("inputMint", Constants.WSOL_MINT)
+    url.searchParams.set("outputMint", Constants.JITOSOL_MINT)
+    url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? "1")
     //new params for the order v2
     if(taker)
         url.searchParams.set("taker", taker)
@@ -102,11 +121,9 @@ async function main() {
     const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}`)
-
-//    console.log(await response.json())
     const quote = await response.json() as JupResponse;
-    const IsTransaction = Boolean(quote.transaction);
-    printQuote(quote, IsTransaction);
+    //console.log(quote);
+    printQuote(quote);
 }
 
 main().catch((error) => {
