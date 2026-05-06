@@ -1,5 +1,5 @@
 {
-  "name": "jito-stake",
+  "name": "jito-staker",
   "version": "1.0.0",
   "description": "Written as a real learning note, with some help structuring the research and examples. If my `skibidi gen z brain` can understand it, yours can too.",
   "main": "index.js",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kurosaki-sol/Jito-stake.git"
+    "url": "git+https://github.com/kurosaki-sol/Jito-Staker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kurosaki-sol/Jito-stake/issues"
+    "url": "https://github.com/kurosaki-sol/Jito-Staker/issues"
   },
-  "homepage": "https://github.com/kurosaki-sol/Jito-stake#readme",
+  "homepage": "https://github.com/kurosaki-sol/Jito-Staker#readme",
   "type": "commonjs",
   "devDependencies": {
     "tsx": "^4.21.0",
