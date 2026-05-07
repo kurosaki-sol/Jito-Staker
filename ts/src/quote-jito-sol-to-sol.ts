@@ -52,19 +52,24 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
-
 function decodeJupTransaction(transactionBase: string){
     const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
     const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes)
-    //console.log("decoded base: " + Object.keys(getCompiledTransactionMessageDecoder().decode(txid.messageBytes)))
-    console.log("Current full message keys :")
+    //If --debug Mode :
+    if(process.argv[5]){
+    console.log("Debug mode - Jupiter message :")
     console.dir(message, {depth: null});
+    }
+    else
+        {
     console.log("Version:", message.version);
     console.log("Required signers:", message.header.numSignerAccounts);
     console.log("Static accounts:", message.staticAccounts.length);
     console.log("Instructions:", message.instructions.length);
     console.log("Address lookup tables:", message.addressTableLookups.length);
     console.log("Lifetime token:", message.lifetimeToken);
+    console.log("Signer:", message.staticAccounts[0]);
+    }
 }
 
 async function printQuote(quote : JupResponse){
@@ -130,7 +135,7 @@ async function main() {
     url.searchParams.set("restrictIntermediateTokens", "true")
     const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
-        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}`)
+        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${errorBody}`)
     const quote = await response.json() as JupResponse;
     //console.log(quote);
     printQuote(quote);
