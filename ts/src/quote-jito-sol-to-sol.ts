@@ -57,8 +57,14 @@ function decodeJupTransaction(transactionBase: string){
     const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
     const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes)
     //console.log("decoded base: " + Object.keys(getCompiledTransactionMessageDecoder().decode(txid.messageBytes)))
-    console.log("decoded message:");
-    console.dir(message, { depth: null });
+    console.log("Current full message keys :")
+    console.dir(message, {depth: null});
+    console.log("Version:", message.version);
+    console.log("Required signers:", message.header.numSignerAccounts);
+    console.log("Static accounts:", message.staticAccounts.length);
+    console.log("Instructions:", message.instructions.length);
+    console.log("Address lookup tables:", message.addressTableLookups.length);
+    console.log("Lifetime token:", message.lifetimeToken);
 }
 
 async function printQuote(quote : JupResponse){
