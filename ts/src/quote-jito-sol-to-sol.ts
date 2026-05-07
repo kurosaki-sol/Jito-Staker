@@ -55,9 +55,10 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
 
 function decodeJupTransaction(transactionBase: string){
     const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
+    const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes)
     //console.log("decoded base: " + Object.keys(getCompiledTransactionMessageDecoder().decode(txid.messageBytes)))
     console.log("decoded message:");
-    console.dir(getCompiledTransactionMessageDecoder().decode(txid.messageBytes), { depth: null });
+    console.dir(message, { depth: null });
 }
 
 async function printQuote(quote : JupResponse){
