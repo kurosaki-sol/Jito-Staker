@@ -12,6 +12,12 @@ interface JupiteRouterPlan {
     //percent: number; Added but dont needed yet. Im lazy
 }
 
+//Bullshit to be honest but lets keep it for the moment
+enum jupenums {
+    Success = "Success",
+    Failed = "Failed"
+}
+
 // To be re-organized properly
 export interface JupOrderResponse {
     inputMint: string,
@@ -38,7 +44,10 @@ export interface JupOrderResponse {
 }
 
 export interface JupExecResponse{
-
+    status : jupenums,
+    signature : string,
+    order : string | null,
+    error : string | null
 }
 
 // TO BE REFACTORED
