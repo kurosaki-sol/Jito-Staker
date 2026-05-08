@@ -13,7 +13,7 @@ interface JupiteRouterPlan {
 }
 
 // To be re-organized properly
-export interface JupResponse {
+export interface JupOrderResponse {
     inputMint: string,
     inAmount: string,
     outputMint : string,
@@ -37,6 +37,10 @@ export interface JupResponse {
     swapUsdValue: string,
 }
 
+export interface JupExecResponse{
+
+}
+
 // TO BE REFACTORED
 function formatTokenAmount(rawAmount : string, decimals : number): string{
     const amount = BigInt(rawAmount)
@@ -53,10 +57,16 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
 }
 
 //This function will only send a already signed transaction to Jupiter with the V2 /execute - RequestId is returned from the jup /order
-function executeJupiterOrder(signedTransactionBase64: string, requestId: string){
-
-    //const url = new URL(Constants.JUPITER_SWAP_API)
-    
+async function executeJupiterOrder(signedTransactionBase64: string, requestId: string){
+    if(!process.env.JUPITER_API_KEY)
+        throw new Error("Jupiter API is missing.")
+    const url = new URL(Constants.JUPITER_EXECUTE_API);
+    url.searchParams.set("requestId", requestId);
+    url.searchParams.set("signedTransactionBase64", signedTransactionBase64);
+    const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
+    if(!response.ok)
+        throw new Error(`Jupiter execute failed: ${response.status} ${response.statusText}\n${response.text}`)
+    const exec = await response.json() as JupExecResponse;
 }
 
 function decodeJupTransaction(transactionBase: string){
@@ -79,7 +89,7 @@ function decodeJupTransaction(transactionBase: string){
     }
 }
 
-async function printQuote(quote : JupResponse){
+async function printQuote(quote : JupOrderResponse){
 
     if(quote.error)
         throw new Error(`${quote.error}`)
@@ -144,7 +154,7 @@ async function main() {
     const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${response.text}`)
-    const quote = await response.json() as JupResponse;
+    const quote = await response.json() as JupOrderResponse;
     //console.log(quote);
     printQuote(quote);
 }
