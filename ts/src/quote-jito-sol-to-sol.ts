@@ -89,7 +89,7 @@ async function printQuote(quote : JupResponse){
         console.log('Signature Fee : ', formatTokenAmount(quote.signatureFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
         console.log('Priority Fee : ', formatTokenAmount(quote.prioritizationFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
     }
-    console.log('Transaction : ' + quote.transaction);
+    console.log('\n======== Transaction ========');
     if (quote.transaction)
         decodeJupTransaction(quote.transaction);
 
@@ -135,7 +135,7 @@ async function main() {
     url.searchParams.set("restrictIntermediateTokens", "true")
     const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
-        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${errorBody}`)
+        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${response.text}`)
     const quote = await response.json() as JupResponse;
     //console.log(quote);
     printQuote(quote);
