@@ -5,6 +5,11 @@ import {getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDe
 
 dotenv.config()
 
+
+enum JupiterExecuteStatus {
+    Success = "Success",
+    Failed = "Failed"
+}
 interface JupiteRouterPlan {
     swapInfo: {
       label: string;
@@ -37,10 +42,6 @@ export interface JupOrderResponse {
     swapUsdValue: string,
 }
 
-enum JupiterExecuteStatus {
-    Success = "Success",
-    Failed = "Failed"
-}
 
 export interface JupiterSwapEvent {
     inputMint: string,
@@ -77,6 +78,22 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
+function parseTokenAmount(rawAmount : string, decimals: number): bigint{
+    //Security in case of bad args
+    // 1 : Trim 
+    // 2 : Check invalid args
+    // 3 : 
+    const amount = rawAmount.trim();
+    if (!/^\d+(\.\d+)?$/.test(amount))
+        throw new Error(`Invalid token amount : ${rawAmount}`)
+    const [whole = "0", fraction = ""] = amount.split('.');
+    // Better than doing a slice tbh because that was only 
+    if (fraction.length > decimals)
+        throw new Error(`Too many decimals : ${rawAmount}`)
+    const fracpadded =  fraction.padEnd(decimals, "0")
+    return BigInt(whole + fracpadded);
+}
+
 //This function will only send a already signed transaction to Jupiter with the V2 /execute - RequestId is returned from the jup /order
 async function executeJupiterOrder(signedTransactionBase64: string, requestId: string, lastValidBlockHeight?: string): Promise<JupExecResponse>{
     if(!process.env.JUPITER_API_KEY)
@@ -106,26 +123,7 @@ async function executeJupiterOrder(signedTransactionBase64: string, requestId: s
     return exec;
 }
 
-function decodeJupTransaction(transactionBase: string){
-    const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
-    const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes)
-    //If --debug Mode :
-    if(process.argv[5]){
-    console.log("Debug mode - Jupiter message :")
-    console.dir(message, {depth: null});
-    }
-    else
-        {
-    console.log("Version:", message.version);
-    console.log("Required signers:", message.header.numSignerAccounts);
-    console.log("Static accounts:", message.staticAccounts.length);
-    console.log("Instructions:", message.instructions.length);
-    console.log("Address lookup tables:", message.addressTableLookups.length);
-    console.log("Lifetime token:", message.lifetimeToken);
-    console.log("Signer:", message.staticAccounts[0]);
-    }
-}
-
+// Get order -> decode -> Print
 async function printQuote(quote : JupOrderResponse){
 
     if(quote.error)
@@ -144,37 +142,37 @@ async function printQuote(quote : JupOrderResponse){
         console.log('Signature Fee : ', formatTokenAmount(quote.signatureFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
         console.log('Priority Fee : ', formatTokenAmount(quote.prioritizationFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
     }
-    console.log('======== Transaction ========');
-    if (quote.transaction)
-        decodeJupTransaction(quote.transaction);
-
-
     if (Math.abs(quote.priceImpact) < 0.01) // treshold to be determinated - NOTE
         console.log("\nThis instant unstake route looks safe for this amount.")
     else
         console.log("\nPrice impact too high. Jito delayed unstake may be cheaper.")
 }
 
-function parseTokenAmount(rawAmount : string, decimals: number): bigint{
-    //Security in case of bad args
-    // 1 : Trim 
-    // 2 : Check invalid args
-    // 3 : 
-    const amount = rawAmount.trim();
-    if (!/^\d+(\.\d+)?$/.test(amount))
-        throw new Error(`Invalid token amount : ${rawAmount}`)
-    const [whole = "0", fraction = ""] = amount.split('.');
-    // Better than doing a slice tbh because that was only 
-    if (fraction.length > decimals)
-        throw new Error(`Too many decimals : ${rawAmount}`)
-    const fracpadded =  fraction.padEnd(decimals, "0")
-    return BigInt(whole + fracpadded);
+function decodeJupTransaction(transactionBase: string){
+
+    const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
+    const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes);
+    console.log('======== Transaction ========');
+    //If --debug Mode :
+    if(process.argv[5]){
+    console.log("Debug mode - Jupiter message :")
+    console.dir(message, {depth: null});
+    }
+    else
+        {
+    console.log("Version:", message.version);
+    console.log("Required signers:", message.header.numSignerAccounts);
+    console.log("Static accounts:", message.staticAccounts.length);
+    console.log("Instructions:", message.instructions.length);
+    console.log("Address lookup tables:", message.addressTableLookups.length);
+    console.log("Lifetime token:", message.lifetimeToken);
+    console.log("Signer:", message.staticAccounts[0]);
+    }
 }
 
-async function main() {
+async function getJupiterOrder(amount: string): Promise<JupOrderResponse>{
     if(!process.env.JUPITER_API_KEY)
         throw new Error("Jupiter API is missing.")
-    const amount = process.argv[2] ?? "1";
     const taker = process.argv[3];
     const receiver = process.argv[4];
     const url = new URL(Constants.JUPITER_QUOTE_API)
@@ -195,8 +193,15 @@ async function main() {
         throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${errorBody}`)
     }
     const quote = await response.json() as JupOrderResponse;
-    //console.log(quote);
+    return quote;
+}
+
+async function main() {
+    const amount = process.argv[2] ?? "1";
+    const quote = await getJupiterOrder(amount);
     printQuote(quote);
+    if(quote.transaction)
+        decodeJupTransaction(quote.transaction);
 }
 
 main().catch((error) => {
