@@ -72,8 +72,10 @@ async function executeJupiterOrder(signedTransactionBase64: string, requestId: s
     url.searchParams.set("requestId", requestId);
     url.searchParams.set("signedTransactionBase64", signedTransactionBase64);
     const response = await fetch(url, {method : "POST", body: JSON.stringify({"requestId" : requestId, "signedTransactionBase64" : signedTransactionBase64}),headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
-    if(!response.ok)
-        throw new Error(`Jupiter execute failed: ${response.status} ${response.statusText}\n${response.text}`)
+    if(!response.ok){
+        const errorBody = response.text();
+        throw new Error(`Jupiter execute failed: ${response.status} ${response.statusText}\n${errorBody}`)
+    }
     const exec = await response.json() as JupExecResponse;
 }
 
@@ -160,8 +162,10 @@ async function main() {
     url.searchParams.set("swapMode", "ExactIn")
     url.searchParams.set("restrictIntermediateTokens", "true")
     const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
-    if(!response.ok)
-        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${response.text}`)
+    if(!response.ok){
+        const errorBody = await response.text()
+        throw new Error(`Jupiter quote failed: ${response.status} ${response.statusText}\n${errorBody}`)
+    }
     const quote = await response.json() as JupOrderResponse;
     //console.log(quote);
     printQuote(quote);
