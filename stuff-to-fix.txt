@@ -1,0 +1,2 @@
+- ECONNRESET on the quote request sometimes. Need to try/catch and retry.
+- Jupiter business error: quote.error
