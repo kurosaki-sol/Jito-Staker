@@ -12,12 +12,6 @@ interface JupiteRouterPlan {
     //percent: number; Added but dont needed yet. Im lazy
 }
 
-//Bullshit to be honest but lets keep it for the moment
-enum jupenums {
-    Success = "Success",
-    Failed = "Failed"
-}
-
 // To be re-organized properly
 export interface JupOrderResponse {
     inputMint: string,
@@ -43,6 +37,11 @@ export interface JupOrderResponse {
     swapUsdValue: string,
 }
 
+//Bullshit to be honest but lets keep it for the moment
+enum jupenums {
+    Success = "Success",
+    Failed = "Failed"
+}
 export interface JupExecResponse{
     status : jupenums,
     signature : string,
@@ -72,7 +71,7 @@ async function executeJupiterOrder(signedTransactionBase64: string, requestId: s
     const url = new URL(Constants.JUPITER_EXECUTE_API);
     url.searchParams.set("requestId", requestId);
     url.searchParams.set("signedTransactionBase64", signedTransactionBase64);
-    const response = await fetch(url, {headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
+    const response = await fetch(url, {method : "POST", body: JSON.stringify({"requestId" : requestId, "signedTransactionBase64" : signedTransactionBase64}),headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
     if(!response.ok)
         throw new Error(`Jupiter execute failed: ${response.status} ${response.statusText}\n${response.text}`)
     const exec = await response.json() as JupExecResponse;
