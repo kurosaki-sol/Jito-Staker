@@ -1,7 +1,7 @@
 import * as Constants from  "./constant.ts";
 import dotenv from 'dotenv';
 
-import {getBase64Decoder, getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDecoder} from "@solana/kit";
+import {getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDecoder} from "@solana/kit";
 
 dotenv.config()
 
@@ -37,16 +37,29 @@ export interface JupOrderResponse {
     swapUsdValue: string,
 }
 
-//Bullshit to be honest but lets keep it for the moment
-enum jupenums {
+enum JupiterExecuteStatus {
     Success = "Success",
     Failed = "Failed"
 }
+
+export interface JupiterSwapEvent {
+    inputMint: string,
+    inputAmount: string,
+    outputMint: string,
+    outputAmount: string,
+}
+
 export interface JupExecResponse{
-    status : jupenums,
-    signature : string,
-    order : string | null,
-    error : string | null
+    status: JupiterExecuteStatus,
+    signature?: string,
+    slot?: string,
+    error?: string,
+    code?: number,
+    totalInputAmount?: string,
+    totalOutputAmount?: string,
+    inputAmountResult?: string,
+    outputAmountResult?: string,
+    swapEvents?: JupiterSwapEvent[],
 }
 
 // TO BE REFACTORED
@@ -65,18 +78,32 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
 }
 
 //This function will only send a already signed transaction to Jupiter with the V2 /execute - RequestId is returned from the jup /order
-async function executeJupiterOrder(signedTransactionBase64: string, requestId: string){
+async function executeJupiterOrder(signedTransactionBase64: string, requestId: string, lastValidBlockHeight?: string): Promise<JupExecResponse>{
     if(!process.env.JUPITER_API_KEY)
         throw new Error("Jupiter API is missing.")
     const url = new URL(Constants.JUPITER_EXECUTE_API);
-    url.searchParams.set("requestId", requestId);
-    url.searchParams.set("signedTransactionBase64", signedTransactionBase64);
-    const response = await fetch(url, {method : "POST", body: JSON.stringify({"requestId" : requestId, "signedTransactionBase64" : signedTransactionBase64}),headers: {"x-api-key" : process.env.JUPITER_API_KEY}})
+
+    const body = {
+        signedTransaction: signedTransactionBase64,
+        requestId,
+        ...(lastValidBlockHeight ? { lastValidBlockHeight } : {}),
+    }
+
+    const response = await fetch(url, {
+        method : "POST",
+        body: JSON.stringify(body),
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key" : process.env.JUPITER_API_KEY,
+        },
+    })
+
     if(!response.ok){
-        const errorBody = response.text();
+        const errorBody = await response.text();
         throw new Error(`Jupiter execute failed: ${response.status} ${response.statusText}\n${errorBody}`)
     }
     const exec = await response.json() as JupExecResponse;
+    return exec;
 }
 
 function decodeJupTransaction(transactionBase: string){
@@ -147,12 +174,13 @@ function parseTokenAmount(rawAmount : string, decimals: number): bigint{
 async function main() {
     if(!process.env.JUPITER_API_KEY)
         throw new Error("Jupiter API is missing.")
+    const amount = process.argv[2] ?? "1";
     const taker = process.argv[3];
     const receiver = process.argv[4];
     const url = new URL(Constants.JUPITER_QUOTE_API)
     url.searchParams.set("inputMint", Constants.WSOL_MINT)
     url.searchParams.set("outputMint", Constants.JITOSOL_MINT)
-    url.searchParams.set("amount", parseTokenAmount(process.argv[2], Constants.JITOSOL_DECIMALS).toString() ?? "1")
+    url.searchParams.set("amount", parseTokenAmount(amount, Constants.JITOSOL_DECIMALS).toString())
     //new params for the order v2
     if(taker)
         url.searchParams.set("taker", taker)
