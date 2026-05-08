@@ -52,6 +52,13 @@ function formatTokenAmount(rawAmount : string, decimals : number): string{
     return `${whole.toString()}.${fractionText}`
 }
 
+//This function will only send a already signed transaction to Jupiter with the V2 /execute - RequestId is returned from the jup /order
+function executeJupiterOrder(signedTransactionBase64: string, requestId: string){
+
+    //const url = new URL(Constants.JUPITER_SWAP_API)
+    
+}
+
 function decodeJupTransaction(transactionBase: string){
     const txid = getTransactionDecoder().decode(getBase64Encoder().encode(transactionBase));
     const message = getCompiledTransactionMessageDecoder().decode(txid.messageBytes)
@@ -76,6 +83,7 @@ async function printQuote(quote : JupResponse){
 
     if(quote.error)
         throw new Error(`${quote.error}`)
+    console.log('======== Quote ========');
     console.log('Input : ' + formatTokenAmount(quote.inAmount, Constants.JITOSOL_DECIMALS)+' JitoSOL')
     console.log('Output : ' + formatTokenAmount(quote.outAmount, Constants.JITOSOL_DECIMALS)+' Sol')
     console.log('Minimum received : '+ formatTokenAmount(quote.otherAmountThreshold, Constants.JITOSOL_DECIMALS) +' Sol')
@@ -89,7 +97,7 @@ async function printQuote(quote : JupResponse){
         console.log('Signature Fee : ', formatTokenAmount(quote.signatureFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
         console.log('Priority Fee : ', formatTokenAmount(quote.prioritizationFeeLamports.toString(), Constants.JITOSOL_DECIMALS))
     }
-    console.log('\n======== Transaction ========');
+    console.log('======== Transaction ========');
     if (quote.transaction)
         decodeJupTransaction(quote.transaction);
 
