@@ -18,11 +18,14 @@ We are building a practical app integration flow:
 Stake:
 SOL -> JitoSOL using Jito direct mint
 
-Unstake:
+Instant unstake:
 JitoSOL -> SOL using Jupiter instant swap
 
-Fallback:
-Jito delayed unstake when Jupiter is too expensive or liquidity is bad
+Direct unstake:
+JitoSOL -> stake account -> deactivate -> withdraw SOL
+
+Router:
+choose between instant Jupiter exit and direct Jito unstake
 ```
 
 ## Why This Repo Exists
@@ -49,11 +52,13 @@ rust/
 ## Learning Path
 
 1. Understand SOL, WSOL, and JitoSOL.
-2. Quote JitoSOL -> SOL using Jupiter.
-3. Build an instant unstake transaction.
-4. Stake SOL -> JitoSOL using Jito direct mint.
-5. Add safety checks for slippage and price impact.
-6. Study the Rust/CPI side once the app flow makes sense.
+2. Quote JitoSOL -> SOL using Jupiter for instant unstake.
+3. Build and inspect the Jupiter order transaction.
+4. Understand wallet signing and Jupiter `/execute`.
+5. Stake SOL -> JitoSOL using Jito direct mint.
+6. Unstake JitoSOL without Jupiter using the Jito/SPL stake pool route.
+7. Build a product router for instant vs direct unstake.
+8. Study the Rust/CPI side once the app flow makes sense.
 
 ## Resources
 

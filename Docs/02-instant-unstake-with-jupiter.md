@@ -2,6 +2,21 @@
 
 This section starts with the easiest part of the integration: quoting an instant exit from JitoSOL back to SOL.
 
+Jupiter is not the whole staking integration.
+
+In this repo, Jupiter is one route:
+
+```txt
+fast unstake path
+JitoSOL -> SOL now
+```
+
+The staking path itself should still be Jito direct mint:
+
+```txt
+SOL -> JitoSOL through the Jito stake pool
+```
+
 The goal is not to send a transaction yet. The goal is to understand what Jupiter tells us before we let a user swap.
 
 ## What We Are Quoting
@@ -122,7 +137,7 @@ The max slippage tolerance in basis points.
 
 Higher slippage makes the transaction more likely to succeed, but it also allows a worse execution price.
 
-### `priceImpactPct`
+### `priceImpact`
 
 The estimated impact of this swap size on the route price.
 
@@ -131,13 +146,15 @@ For small JitoSOL amounts, this should usually be low. If this number gets too h
 The first safety rule in this repo is intentionally simple:
 
 ```txt
-if priceImpactPct < 0.01:
+if abs(priceImpact) < threshold:
   Jupiter instant unstake looks safe for this amount
 else:
   Jito delayed unstake may be cheaper
 ```
 
 This is not the final production rule. It is just a first learning rule.
+
+Note: Jupiter v2 may still return `priceImpactPct`, but the newer field to prefer is `priceImpact`.
 
 ### `routePlan`
 
@@ -207,4 +224,12 @@ Next step:
 
 ```txt
 Turn the quote into a Jupiter swap transaction that a wallet can sign.
+```
+
+After the Jupiter instant path, this repo comes back to the Jito-native paths:
+
+```txt
+Stake SOL with Jito direct mint
+Unstake without Jupiter
+Choose the right route for the user
 ```

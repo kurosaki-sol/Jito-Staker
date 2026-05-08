@@ -6,6 +6,10 @@ At this point, we can quote an instant unstake route:
 JitoSOL -> SOL
 ```
 
+This chapter is only about the Jupiter instant unstake path.
+
+It does not replace the Jito-native staking or direct unstaking flows.
+
 But a quote alone is not enough to let the user execute the swap.
 
 The next step is to ask Jupiter to build an order transaction that the user can sign with their wallet.
@@ -294,4 +298,12 @@ The next implementation step is:
 sign the decoded transaction with a wallet
 encode the signed transaction back to base64
 POST it to Jupiter /execute with requestId
+```
+
+After that, the course returns to the missing Jito-native pieces:
+
+```txt
+SOL -> JitoSOL with Jito direct mint
+JitoSOL -> SOL without Jupiter
+route selection between instant and direct exits
 ```

@@ -4,6 +4,16 @@ At this point, Jupiter can return a base64 transaction from `/order`.
 
 We can also decode that transaction locally and inspect the compiled message.
 
+This chapter is about signing and executing the Jupiter instant unstake route only.
+
+The broader repo still needs to cover:
+
+```txt
+staking with Jito direct mint
+unstaking without Jupiter
+route selection between both unstake paths
+```
+
 The next step is execution:
 
 ```txt
