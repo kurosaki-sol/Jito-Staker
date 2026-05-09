@@ -15,8 +15,11 @@ JitoSOL represents staked SOL plus accumulated staking rewards and MEV-related r
 We are building a practical app integration flow:
 
 ```txt
-Stake:
+Protocol-native stake:
 SOL -> JitoSOL using Jito direct mint
+
+Market acquire:
+SOL -> JitoSOL using Jupiter swap
 
 Instant unstake:
 JitoSOL -> SOL using Jupiter instant swap
@@ -25,7 +28,7 @@ Direct unstake:
 JitoSOL -> stake account -> deactivate -> withdraw SOL
 
 Router:
-choose between instant Jupiter exit and direct Jito unstake
+choose between protocol-native routes and market routes
 ```
 
 ## Why This Repo Exists
@@ -53,12 +56,13 @@ rust/
 
 1. Understand SOL, WSOL, and JitoSOL.
 2. Quote JitoSOL -> SOL using Jupiter for instant unstake.
-3. Build and inspect the Jupiter order transaction.
-4. Understand wallet signing and Jupiter `/execute`.
-5. Stake SOL -> JitoSOL using Jito direct mint.
-6. Unstake JitoSOL without Jupiter using the Jito/SPL stake pool route.
-7. Build a product router for instant vs direct unstake.
-8. Study the Rust/CPI side once the app flow makes sense.
+3. Quote SOL -> JitoSOL using Jupiter as a market acquire route.
+4. Build and inspect Jupiter order transactions.
+5. Understand wallet signing and Jupiter `/execute`.
+6. Stake SOL -> JitoSOL using Jito direct mint.
+7. Unstake JitoSOL without Jupiter using the Jito/SPL stake pool route.
+8. Build a product router across direct mint, market buy, instant sell, and direct unstake.
+9. Study the Rust/CPI side once the app flow makes sense.
 
 ## Resources
 

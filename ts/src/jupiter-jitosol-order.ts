@@ -5,6 +5,7 @@ import {getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDe
 
 dotenv.config()
 
+type JitoSolOrderSide = "buy" | "sell";
 
 enum JupiterExecuteStatus {
     Success = "Success",

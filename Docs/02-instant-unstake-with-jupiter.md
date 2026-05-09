@@ -4,17 +4,26 @@ This section starts with the easiest part of the integration: quoting an instant
 
 Jupiter is not the whole staking integration.
 
-In this repo, Jupiter is one route:
+In this repo, Jupiter is a market route:
 
 ```txt
-fast unstake path
-JitoSOL -> SOL now
+market buy:
+SOL -> JitoSOL
+
+market sell:
+JitoSOL -> SOL
 ```
 
 The staking path itself should still be Jito direct mint:
 
 ```txt
 SOL -> JitoSOL through the Jito stake pool
+```
+
+This chapter focuses on the sell side:
+
+```txt
+JitoSOL -> SOL
 ```
 
 The goal is not to send a transaction yet. The goal is to understand what Jupiter tells us before we let a user swap.
@@ -56,6 +65,9 @@ This gives us the product flow:
 ```txt
 Stake:
 SOL -> JitoSOL with Jito direct mint
+
+Market acquire:
+SOL -> JitoSOL with Jupiter
 
 Instant unstake:
 JitoSOL -> SOL with Jupiter
@@ -230,6 +242,7 @@ After the Jupiter instant path, this repo comes back to the Jito-native paths:
 
 ```txt
 Stake SOL with Jito direct mint
+Acquire JitoSOL with Jupiter
 Unstake without Jupiter
 Choose the right route for the user
 ```
